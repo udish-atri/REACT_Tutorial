@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert } from 'react-bootstrap';
 import { useNavigate, useParams } from 'react-router-dom';
 import PizzaForm, { type PizzaFormValues } from '../components/PizzaForm';
@@ -10,6 +10,7 @@ const EditPizzaPage: React.FC = () => {
   const id = Number(pizzaId);
   const navigate = useNavigate();
   const { getPizzaById, editPizza, deletePizza } = usePizza();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pizza = getPizzaById(id);
 
@@ -17,19 +18,29 @@ const EditPizzaPage: React.FC = () => {
     return <Alert variant="danger">Pizza not found.</Alert>;
   }
 
-  const handleSubmit = (values: PizzaFormValues) => {
-    editPizza(id, {
-      name: values.name,
-      toppings: values.toppings as Topping[],
-      fanFavorite: values.fanFavorite === 'yes',
-      delivery: values.delivery === 'yes',
-    });
-    navigate('/');
+  const handleSubmit = async (values: PizzaFormValues) => {
+    try {
+      setIsSubmitting(true);
+      await editPizza(id, {
+        name: values.name,
+        toppings: values.toppings as Topping[],
+        fanFavorite: values.fanFavorite === 'yes',
+        delivery: values.delivery === 'yes',
+      });
+      navigate('/');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = () => {
-    deletePizza(id);
-    navigate('/');
+  const handleDelete = async () => {
+    try {
+      setIsSubmitting(true);
+      await deletePizza(id);
+      navigate('/');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,6 +51,7 @@ const EditPizzaPage: React.FC = () => {
         onSubmit={handleSubmit}
         onDelete={handleDelete}
         submitLabel="Save Changes"
+        isSubmitting={isSubmitting}
       />
     </div>
   );

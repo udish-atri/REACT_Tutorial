@@ -7,22 +7,27 @@ import type { Topping } from '../types/pizza';
 const AddPizzaPage: React.FC = () => {
   const { addPizza } = usePizza();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleSubmit = (values: PizzaFormValues) => {
-    addPizza({
+  const handleSubmit = async (values: PizzaFormValues) => {
+    try{
+      setIsSubmitting(true);
+      await addPizza({
       name: values.name,
       toppings: values.toppings as Topping[],
       fanFavorite: values.fanFavorite === 'yes',
       delivery: values.delivery === 'yes',
     });
-
     navigate('/');
+    }finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div>
       <h2>Add Pizza</h2>
-      <PizzaForm onSubmit={handleSubmit} submitLabel="Add Pizza" />
+      <PizzaForm onSubmit={handleSubmit} submitLabel="Add Pizza" isSubmitting={isSubmitting} />
     </div>
   );
 };

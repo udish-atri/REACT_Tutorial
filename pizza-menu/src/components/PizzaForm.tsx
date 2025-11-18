@@ -17,6 +17,7 @@ interface Props {
   onSubmit: (values: PizzaFormValues) => void;
   onDelete?: () => void;
   submitLabel?: string;
+  isSubmitting?: boolean;
 }
 
 const PizzaForm: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const PizzaForm: React.FC<Props> = ({
   onSubmit,
   onDelete,
   submitLabel = 'Save',
+  isSubmitting = false,
 }) => {
   const {
     register,
@@ -77,6 +79,7 @@ const PizzaForm: React.FC<Props> = ({
               label={topping}
               value={topping}
               {...register('toppings')}
+              disabled={isSubmitting}
             />
           ))}
         </div>
@@ -92,6 +95,7 @@ const PizzaForm: React.FC<Props> = ({
             value="yes"
             {...register('fanFavorite')}
             inline
+            disabled={isSubmitting}
           />
           <Form.Check
             type="radio"
@@ -99,6 +103,7 @@ const PizzaForm: React.FC<Props> = ({
             value="no"
             {...register('fanFavorite')}
             inline
+            disabled={isSubmitting}
           />
         </div>
       </Form.Group>
@@ -115,19 +120,20 @@ const PizzaForm: React.FC<Props> = ({
               options={deliveryOptions}
               value={deliveryOptions.find((opt) => opt.value === field.value)}
               onChange={(option) => field.onChange(option?.value ?? 'no')}
+              isDisabled={isSubmitting}
             />
           )}
         />
       </Form.Group>
 
       <div className="d-flex gap-2">
-        <Button variant="primary" type="submit">
-          {submitLabel}
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : submitLabel}
         </Button>
 
         {onDelete && (
-          <Button variant="danger" type="button" onClick={onDelete}>
-            Delete
+          <Button variant="danger" type="button" onClick={onDelete} disabled={isSubmitting}>
+            {isSubmitting ? 'Working...' : 'Delete'}
           </Button>
         )}
       </div>

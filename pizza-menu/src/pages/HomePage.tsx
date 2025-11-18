@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import PizzaTable from '../components/PizzaTable';
+import PizzaToppingsChart from '../components/PizzaToppingsChart';
 import { usePizza } from '../hooks/usePizza';
 
 const HomePage: React.FC = () => {
@@ -19,6 +20,13 @@ const HomePage: React.FC = () => {
       {loading && <p>Loading pizzas...</p>}
       {error && <p className="text-danger">{error}</p>}
 
+      {/* Chart section */}
+      <div className="mb-4">
+        <h4>Pizza Toppings Overview</h4>
+        <PizzaToppingsChart />
+      </div>
+
+      {/* Table */}
       {!loading && <PizzaTable pizzas={pizzas} />}
     </div>
   );
