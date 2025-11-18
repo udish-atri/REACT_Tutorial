@@ -1,65 +1,92 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useState, type PropsWithChildren } from 'react';
+
+import axios from 'axios';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import type { Pizza, Topping } from '../types/pizza';
 
 interface PizzaContextValue {
   pizzas: Pizza[];
-  addPizza: (pizza: Omit<Pizza, 'id'>) => void;
-  editPizza: (id: number, updated: Omit<Pizza, 'id'>) => void;
-  deletePizza: (id: number) => void;
+  loading: boolean;
+  error: string | null;
+  addPizza: (pizza: Omit<Pizza, 'id'>) => Promise<void>;
+  editPizza: (id: number, updated: Omit<Pizza, 'id'>) => Promise<void>;
+  deletePizza: (id: number) => Promise<void>;
   getPizzaById: (id: number) => Pizza | undefined;
 }
 
 const PizzaContext = createContext<PizzaContextValue | undefined>(undefined);
 
-// Demo data
-const initialPizzas: Pizza[] = [
-  {
-    id: 1,
-    name: 'Margherita',
-    toppings: ['Cheese'],
-    fanFavorite: true,
-    delivery: true,
-  },
-  {
-    id: 2,
-    name: 'Pepperoni Feast',
-    toppings: ['Cheese', 'Pepperoni'],
-    fanFavorite: true,
-    delivery: false,
-  },
-  {
-    id: 3,
-    name: 'Veggie Delight',
-    toppings: ['Cheese', 'Mushrooms', 'Onions', 'Olives'],
-    fanFavorite: false,
-    delivery: true,
-  },
-];
+// json-server base URL
+const API_URL = 'http://localhost:3001';
 
 export const PizzaProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const [pizzas, setPizzas] = useState<Pizza[]>(initialPizzas);
-  const [nextId, setNextId] = useState<number>(initialPizzas.length + 1);
+  const [pizzas, setPizzas] = useState<Pizza[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const addPizza = (pizza: Omit<Pizza, 'id'>) => {
-    setPizzas((prev) => [...prev, { ...pizza, id: nextId }]);
-    setNextId((id) => id + 1);
+  // Load pizzas from json-server when app starts
+  useEffect(() => {
+    const fetchPizzas = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const res = await axios.get<Pizza[]>(`${API_URL}/pizzas`);
+        setPizzas(res.data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load pizzas');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPizzas();
+  }, []);
+
+  const addPizza = async (pizza: Omit<Pizza, 'id'>) => {
+    try {
+      const res = await axios.post<Pizza>(`${API_URL}/pizzas`, pizza);
+      setPizzas((prev) => [...prev, res.data]);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to add pizza');
+    }
   };
 
-  const editPizza = (id: number, updated: Omit<Pizza, 'id'>) => {
-    setPizzas((prev) =>
-      prev.map((p) => (p.id === id ? { ...updated, id } : p))
-    );
+  const editPizza = async (id: number, updated: Omit<Pizza, 'id'>) => {
+    try {
+      const res = await axios.put<Pizza>(`${API_URL}/pizzas/${id}`, updated);
+      setPizzas((prev) =>
+        prev.map((p) => (p.id === id ? res.data : p))
+      );
+    } catch (err) {
+      console.error(err);
+      setError('Failed to edit pizza');
+    }
   };
 
-  const deletePizza = (id: number) => {
-    setPizzas((prev) => prev.filter((p) => p.id !== id));
+  const deletePizza = async (id: number) => {
+    try {
+      await axios.delete(`${API_URL}/pizzas/${id}`);
+      setPizzas((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error(err);
+      setError('Failed to delete pizza');
+    }
   };
 
   const getPizzaById = (id: number) => pizzas.find((p) => p.id === id);
 
   const value: PizzaContextValue = {
     pizzas,
+    loading,
+    error,
     addPizza,
     editPizza,
     deletePizza,
