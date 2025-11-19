@@ -5,17 +5,17 @@ import Select from 'react-select';
 import { ALL_TOPPINGS } from '../hooks/usePizza';
 import type { Pizza } from '../types/pizza';
 
-type PizzaFormValues = {
+export type PizzaFormValues = {
   name: string;
-  toppings: string[];          // store labels; we convert later
+  toppings: string[];
   fanFavorite: 'yes' | 'no';
   delivery: 'yes' | 'no';
 };
 
 interface Props {
   initialValues?: Pizza;
-  onSubmit: (values: PizzaFormValues) => void;
-  onDelete?: () => void;
+  onSubmit: (values: PizzaFormValues) => Promise<void> | void;
+  onDelete?: () => Promise<void> | void;
   submitLabel?: string;
   isSubmitting?: boolean;
 }
@@ -59,9 +59,11 @@ const PizzaForm: React.FC<Props> = ({
       <Form.Group className="mb-3">
         <Form.Label>Pizza Name</Form.Label>
         <Form.Control
+          id="pizza-name"
           type="text"
           placeholder="Enter pizza name"
           {...register('name', { required: 'Name is required' })}
+          disabled={isSubmitting}
         />
         {errors.name && (
           <Form.Text className="text-danger">{errors.name.message}</Form.Text>
@@ -80,6 +82,7 @@ const PizzaForm: React.FC<Props> = ({
               value={topping}
               {...register('toppings')}
               disabled={isSubmitting}
+              data-cy={`topping-${topping}`}
             />
           ))}
         </div>
@@ -96,6 +99,7 @@ const PizzaForm: React.FC<Props> = ({
             {...register('fanFavorite')}
             inline
             disabled={isSubmitting}
+            data-cy="fanFavorite-yes"
           />
           <Form.Check
             type="radio"
@@ -104,6 +108,7 @@ const PizzaForm: React.FC<Props> = ({
             {...register('fanFavorite')}
             inline
             disabled={isSubmitting}
+            data-cy="fanFavorite-no"
           />
         </div>
       </Form.Group>
@@ -117,10 +122,11 @@ const PizzaForm: React.FC<Props> = ({
           render={({ field }) => (
             <Select
               {...field}
+              isDisabled={isSubmitting}
               options={deliveryOptions}
               value={deliveryOptions.find((opt) => opt.value === field.value)}
               onChange={(option) => field.onChange(option?.value ?? 'no')}
-              isDisabled={isSubmitting}
+              classNamePrefix="react-select"
             />
           )}
         />
@@ -128,12 +134,17 @@ const PizzaForm: React.FC<Props> = ({
 
       <div className="d-flex gap-2">
         <Button variant="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : submitLabel}
+          {isSubmitting ? 'Saving…' : submitLabel}
         </Button>
 
         {onDelete && (
-          <Button variant="danger" type="button" onClick={onDelete} disabled={isSubmitting}>
-            {isSubmitting ? 'Working...' : 'Delete'}
+          <Button
+            variant="danger"
+            type="button"
+            onClick={() => onDelete()}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Working…' : 'Delete'}
           </Button>
         )}
       </div>
@@ -141,5 +152,4 @@ const PizzaForm: React.FC<Props> = ({
   );
 };
 
-export type { PizzaFormValues };
 export default PizzaForm;

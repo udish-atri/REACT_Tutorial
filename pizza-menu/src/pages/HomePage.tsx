@@ -12,7 +12,11 @@ const HomePage: React.FC = () => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Pizza Menu</h2>
 
-        <Link to="/add-pizza" className="btn btn-success">
+        <Link
+          to="/add-pizza"
+          className="btn btn-success"
+          data-cy="add-pizza-link"
+        >
           + Add Pizza
         </Link>
       </div>
@@ -20,13 +24,11 @@ const HomePage: React.FC = () => {
       {loading && <p>Loading pizzas...</p>}
       {error && <p className="text-danger">{error}</p>}
 
-      {/* Chart section */}
       <div className="mb-4">
         <h4>Pizza Toppings Overview</h4>
         <PizzaToppingsChart />
       </div>
 
-      {/* Table */}
       {!loading && <PizzaTable pizzas={pizzas} />}
     </div>
   );

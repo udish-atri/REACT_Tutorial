@@ -1,3 +1,5 @@
+
+
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import React from 'react';
 import { Table } from 'react-bootstrap';
@@ -51,14 +53,16 @@ const PizzaTable: React.FC<Props> = ({ pizzas }) => {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  return (
+ return (
     <Table striped bordered hover responsive>
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
               <th key={header.id}>
-                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(header.column.columnDef.header, header.getContext())}
               </th>
             ))}
           </tr>
@@ -66,7 +70,7 @@ const PizzaTable: React.FC<Props> = ({ pizzas }) => {
       </thead>
       <tbody>
         {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
+          <tr key={row.id} data-cy="pizza-row">
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id}>
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
